@@ -1,0 +1,101 @@
+<!doctype HTML>
+<html>
+<head>
+    <style>
+        .scatter {
+            fill: steelblue;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<div id = "proportionalSymbol"></div>
+<script>
+    var canvasWidth = 600;
+    var canvasHeight = 600;
+    var margin = 200;
+
+    var svg = d3.select("#proportionalSymbol").append("svg")
+        .attr("width",  canvasWidth)
+        .attr("height", canvasHeight)
+
+    var width = svg.attr("width") - margin;
+    var height = svg.attr("height") - margin;
+
+    svg.append("text")
+        .attr("transform", "translate(100, 0)")
+        .attr("x", 65)
+        .attr("y", 50)
+        .attr("font-size", "24px")
+        .text("Maximum Players from 2017-2021 by Game")
+
+
+    var container_g = svg.append("g")
+        .attr("transform",
+            "translate(" + 100 + ", " + 100 + ")");
+
+    d3.csv("maxCountTitles.csv").then(data => {
+        gameArray = [];
+        data.forEach((d) => {
+
+        })
+        const circleSize = d3.scaleLinear().domain([1000000, 50500000])
+            .range([7, 100])
+
+        var tooltip = d3.select("#proportionalSymbol")
+            .append("div")
+            .style("opacity", 1)
+            .attr("class", "tooltip")
+            .style("position","absolute")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("padding", "10px")
+
+        const mouseover = function(event, d){
+            tooltip
+                .html("Players: " + d.Count + "<br>" + "Game: " + d.Titles)
+                .style("opacity", 1)
+        }
+
+        const mousemove = function(event, d){
+            tooltip
+                .style("left", (event.x)+30 + "px")
+                .style("top", (event.y)+30 + "px")
+                // .style("transform", "translate("+(event.x)+"px,"+(event.y)+"px)")
+        }
+
+        var mouseleave = function(event, d){
+            tooltip
+                .style("opacity", 0)
+        }
+
+        var color = d3.scaleOrdinal(d3.schemeCategory10)
+        var circles = container_g.append("g")
+            .selectAll("circle")
+            .data(data)
+            .join("circle")
+            .attr("r", function(d){return circleSize(+d.Count)})
+            .attr("cx", canvasWidth / 2)
+            .attr("cy", canvasHeight / 2)
+            .style("fill", function(d){return color(d.Titles)})
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseleave", mouseleave);
+
+        const simulation = d3.forceSimulation()
+            .force("center", d3.forceCenter().x(canvasWidth / 2).y(canvasHeight / 2))
+            .force("charge", d3.forceManyBody().strength(.3))
+            .force("collide", d3.forceCollide().strength(.3).radius(function(d){return circleSize(+d.Count)}).iterations(1))
+
+        simulation
+            .nodes(data)
+            .on("tick", function(d){circles
+            .attr("cx", function(d){return d.x})
+            .attr("cy", function(d){return d.y})})
+    })
+
+</script>
+</body>
+</html>

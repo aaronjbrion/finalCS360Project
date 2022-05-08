@@ -1,0 +1,180 @@
+<!doctype HTML>
+<html>
+<head>
+    <style>
+        .scatter {
+            fill: steelblue;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+</head>
+<body>
+<div id = "scatterPlot"></div>
+<script>
+    var canvasWidth = 800;
+    var canvasHeight = 800;
+    var margin = 200;
+
+    var svg = d3.select("body").append("svg")
+        .attr("width",  canvasWidth)
+        .attr("height", canvasHeight)
+
+    var width = svg.attr("width") - margin;
+    var height = svg.attr("height") - margin;
+
+    svg.append("text")
+        .attr("transform", "translate(100, 0)")
+        .attr("x", 85)
+        .attr("y", 50)
+        .attr("font-size", "24px")
+        .text("Player Count by Game")
+
+    var container_g = svg.append("g")
+        .attr("transform",
+            "translate(" + 100 + ", " + 100 + ")");
+
+    d3.csv("maxPlayerCount.csv").then(data => {
+        const xScale = d3.scaleBand().range([0, width]).padding(1.5);
+        const yScale = d3.scaleLinear().range([height, 0]);
+        var color = d3.scaleOrdinal()
+            .domain(["PUBG", "CSGO", "Grand Theft Auto V", "Rainbow Six Siege"]).range(['#e41a1c','#377eb8','#4daf4a', '#FFFF00'])
+
+        xScale.domain(data.map(function(d){
+            return d.Year;
+        }));
+
+        yScale.domain([0, 3400000]);
+
+        var tooltip = d3.select("#scatterPlot")
+            .append("div")
+            .style("opacity", 1)
+            .attr("class", "tooltip")
+            .style("position","absolute")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("padding", "10px")
+
+        const mouseover = function(event, d){
+            tooltip
+                .html("Players: " + d.Count)
+                .style("opacity", 1)
+        }
+
+        const mousemove = function(event, d){
+            tooltip
+                .style("transform", "translate("+(event.pageX)+"px,"+(event.pageY)+"px)")
+        }
+
+        var mouseleave = function(event, d){
+            tooltip
+                .style("opacity", 0)
+        }
+
+        // Draw bars!
+
+        container_g.selectAll(".scatter")
+            .data(data)
+            .enter().append("circle")
+            .attr("class", "scatter")
+            .attr("cx", function(d) {return xScale(d.Year); })
+            .attr("cy", function(d) {return yScale(d.Count); })
+            .attr("r", 5)
+            .style("fill", function(d) {return color(d.Game);})
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseleave", mouseleave);
+
+        // Display the X-axis
+        container_g.append("g")
+            .attr("transform", "translate(0, " + width + ")")
+            .call(d3.axisBottom(xScale))
+            .append("text")
+            .attr("y", height-340)
+            .attr("x", width-300)
+            .attr("stroke", "black")
+            .text("Year")
+
+        // Display the Y-axis
+        container_g.append("g")
+            .call(d3.axisLeft(yScale).tickFormat(function(d) {
+                return d;
+            }).ticks(8))
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -5)
+            .attr("x", -100)
+            .attr("dy", "-5.1em")
+            .attr("stroke", "black")
+            .text("Player Count")
+
+        container_g.append("rect")
+            .attr("x", 400)
+            .attr("y", 100)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "#e41a1c")
+
+        container_g.append("rect")
+            .attr("x", 400)
+            .attr("y", 120)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "#377eb8")
+
+        container_g.append("rect")
+            .attr("x", 400)
+            .attr("y", 140)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "#4daf4a")
+
+        container_g.append("rect")
+            .attr("x", 400)
+            .attr("y", 160)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "#FFFF00")
+
+        container_g.append("text")
+            .attr("transform", "translate(100, 0)")
+            .attr("x", 320)
+            .attr("y", 110)
+            .attr("font-size", "15px")
+            .text("PUBG")
+
+        container_g.append("text")
+            .attr("transform", "translate(100, 0)")
+            .attr("x", 320)
+            .attr("y", 130)
+            .attr("font-size", "15px")
+            .text("CSGO")
+
+        container_g.append("text")
+            .attr("transform", "translate(100, 0)")
+            .attr("x", 320)
+            .attr("y", 150)
+            .attr("font-size", "15px")
+            .text("Grand Theft Auto V")
+
+        container_g.append("text")
+            .attr("transform", "translate(100, 0)")
+            .attr("x", 320)
+            .attr("y", 170)
+            .attr("font-size", "15px")
+            .text("Rainbow Six Siege")
+
+        container_g.append("text")
+            .attr("transform", "translate(100, 0)")
+            .attr("x", 170)
+            .attr("y", 660)
+            .attr("font-size", "25px")
+            .text("Year")
+
+    })
+
+</script>
+</body>
+</html>
