@@ -7,7 +7,6 @@
         }
     </style>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
 </head>
 <body>
 <div id = "scatterPlot"></div>
@@ -23,6 +22,7 @@
     var width = svg.attr("width") - margin;
     var height = svg.attr("height") - margin;
 
+    // Title of the scatter plot
     svg.append("text")
         .attr("transform", "translate(100, 0)")
         .attr("x", 85)
@@ -34,6 +34,7 @@
         .attr("transform",
             "translate(" + 100 + ", " + 100 + ")");
 
+    // collected the data using the processed CSV file
     d3.csv("maxPlayerCount.csv").then(data => {
         const xScale = d3.scaleBand().range([0, width]).padding(1.5);
         const yScale = d3.scaleLinear().range([height, 0]);
@@ -46,6 +47,7 @@
 
         yScale.domain([0, 3400000]);
 
+        // Initialized the hovering function (mouseover, mouseleave)
         var tooltip = d3.select("#scatterPlot")
             .append("div")
             .style("opacity", 1)
@@ -56,25 +58,21 @@
             .style("border-width", "1px")
             .style("border-radius", "5px")
             .style("padding", "10px")
-
         const mouseover = function(event, d){
             tooltip
                 .html("Players: " + d.Count)
                 .style("opacity", 1)
         }
-
         const mousemove = function(event, d){
             tooltip
                 .style("transform", "translate("+(event.pageX)+"px,"+(event.pageY)+"px)")
         }
-
         var mouseleave = function(event, d){
             tooltip
                 .style("opacity", 0)
         }
 
-        // Draw bars!
-
+        // Appending each circle for each value
         container_g.selectAll(".scatter")
             .data(data)
             .enter().append("circle")
@@ -110,6 +108,8 @@
             .attr("stroke", "black")
             .text("Player Count")
 
+
+        // manually created a legend
         container_g.append("rect")
             .attr("x", 400)
             .attr("y", 100)
@@ -174,6 +174,7 @@
             .text("Year")
 
     })
+
 </script>
 </body>
-</html> 
+</html>
