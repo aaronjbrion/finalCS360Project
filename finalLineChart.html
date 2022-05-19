@@ -17,19 +17,23 @@
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
 
+    // Scaling and translating the canvas for the visualization
     var svg = d3.select("svg"),
         margin = {top: 20, right: 80, bottom: 30, left: 50},
         width = svg.attr("width") - margin.left - margin.right,
         height = svg.attr("height") - margin.top - margin.bottom,
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
+    // convert the time format to the year and the month (20xx-xx)
     var parseTime = d3.timeParse("%Y%m");
 
+    // scaling each axis and line.
     var x = d3.scaleTime().range([0, width - margin.right]),
         y = d3.scaleLinear().range([height, 0]),
         z = d3.scaleOrdinal(d3.schemeCategory10);
 
-
+    // line scale for the curving per year
     const makeLine = (xScale) => d3.line()
         .curve(d3.curveBasis)
         .x(function(d) { return xScale(d.Date); })
@@ -40,10 +44,19 @@
         .x(function(d) { return x(d.Date); })
         .y(function(d) { return y(d.count); });
 
+    svg.append("text")
+        .attr("transform", "translate(100, 0)")
+        .attr("x", 75)
+        .attr("y", 30)
+        .attr("font-size", "24px")
+        .text("Player Count in Video Games (by month)")
+
+    // collected the data using the processed CSV file
     d3.csv("secondPlayerCount.csv", function(d) {
         return d;
     }).then(function(data) {
 
+        // initialized a list to take in the game titles to scale it to the axis
         let columns = ['Date', 'PUBG', 'Grand Theft Auto V', 'Rainbow Six Siege']
         for (d of data) {
             d.Date = parseTime(d.Date);
@@ -59,6 +72,8 @@
             };
         });
 
+
+        // setting the input and output values for the x and y axis
         x.domain(d3.extent(data, function(d) { return d.Date; }));
 
         y.domain([
@@ -92,7 +107,7 @@
             .attr("class", "city")
             .attr("width", width - margin.right);
 
-
+        // hover function to select a specific line
         function hover(elem) {
             var attrs = elem.srcElement.attributes;
             let id = attrs['data-id'].value;
@@ -123,6 +138,7 @@
             });
         }
 
+        // clicking function to make the line invisible or visible again
         function click(elem) {
             var attrs = elem.srcElement.attributes;
             let id = attrs['data-id'].value;
@@ -140,6 +156,7 @@
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0))
 
+        // function that allows user to zoom into the visualization to look at the specific months
         function zoomed(event) {
             const xZoom = event.transform.rescaleX(x);
             city.selectAll('.line').attr('d', function(d){return makeLine(xZoom)(d.values);})
@@ -158,7 +175,7 @@
             .call(zoom.scaleTo, 1, [x(Date.UTC(2012, 1, 1)), 0]);
 
 
-
+        // appending all the lines and calling the interaction functions
         city.append("path")
             .attr("class", "line")
             .attr("transform", "translate(10, 0)")
