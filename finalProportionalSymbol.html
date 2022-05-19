@@ -11,6 +11,8 @@
 <body>
 <div id = "proportionalSymbol"></div>
 <script>
+
+    // setup the canvas for the visualization
     var canvasWidth = 600;
     var canvasHeight = 600;
     var margin = 200;
@@ -22,6 +24,7 @@
     var width = svg.attr("width") - margin;
     var height = svg.attr("height") - margin;
 
+    // Title of the Proportional Symbol Map
     svg.append("text")
         .attr("transform", "translate(100, 0)")
         .attr("x", 65)
@@ -34,16 +37,17 @@
         .attr("transform",
             "translate(" + 100 + ", " + 100 + ")");
 
+    // collected the data using the processed CSV file
     d3.csv("maxCountTitles.csv").then(data => {
         gameArray = [];
         data.forEach((d) => {
-
         })
+
+        // scaling the circle size
         const circleSize = d3.scaleLinear().domain([1000000, 50500000])
             .range([7, 100])
 
-        var legendRadius = d3.scaleSqrt().domain([0, 10039107]).range([0, 50])
-
+        // Initialized the hovering function (mouseover, mouseleave)
         var tooltip = d3.select("#proportionalSymbol")
             .append("div")
             .style("opacity", 1)
@@ -65,7 +69,6 @@
             tooltip
                 .style("left", (event.x)+30 + "px")
                 .style("top", (event.y)+30 + "px")
-                // .style("transform", "translate("+(event.x)+"px,"+(event.y)+"px)")
         }
 
         var mouseleave = function(event, d){
@@ -73,7 +76,10 @@
                 .style("opacity", 0)
         }
 
+        // initializing the color group to assign to each circle
         var color = d3.scaleOrdinal(d3.schemeCategory10)
+
+        // Appending the four circles assigned to each game.
         var circles = container_g.append("g")
             .selectAll("circle")
             .data(data)
@@ -97,6 +103,7 @@
             .attr("cx", function(d){return d.x})
             .attr("cy", function(d){return d.y})})
 
+        // manually created a legend
         svg.append("rect")
             .attr("x", 450)
             .attr("y", 100)
