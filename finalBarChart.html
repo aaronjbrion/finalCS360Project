@@ -7,15 +7,17 @@
         }
     </style>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
 </head>
 <body>
 <div id = "barChart"></div>
 <script>
+
+    // scaling the canvas for the visualization
     var canvasWidth = 600;
     var canvasHeight = 600;
     var margin = 200;
 
+    // initializing the div id to embed in html file
     var svg = d3.select("#barChart").append("svg")
         .attr("width",  canvasWidth)
         .attr("height", canvasHeight)
@@ -23,6 +25,7 @@
     var width = svg.attr("width") - margin;
     var height = svg.attr("height") - margin;
 
+    // visualization title
     svg.append("text")
         .attr("transform", "translate(100, 0)")
         .attr("x", 75)
@@ -48,16 +51,13 @@
             "translate(" + 200 + ", " + 200 + ")");
 
 
-
+    // data processing from CSV file
     d3.csv("barChart.csv")
     .then(function(data){
         // List of subgroups = header of the csv files = soil condition here
         const years = data.columns.slice(1)
 
-        console.log(years)
-
         const groups = data.map(d => d.Year)
-        console.log(groups)
 
         const x = d3.scaleBand()
             .domain(groups)
@@ -74,7 +74,7 @@
             .call(d3.axisLeft(y))
             .attr("transform", "translate(100, 25)");
 
-        // Another scale for subgroup position?
+        // Another scale for subgroup position
         const xSubgroup = d3.scaleBand()
             .domain(years)
             .range([0, x.bandwidth()])
@@ -85,17 +85,7 @@
             .domain(years)
             .range(['#e41a1c','#377eb8','#4daf4a', '#FFFF00'])
 
-
-
-        // svg.append("g")
-        //     .attr("transform", "translate(0, " + width + ")")
-        //     .call(d3.axisBottom(x))
-        //     .append("text")
-        //     .attr("y", height-340)
-        //     .attr("x", width-300)
-        //     .attr("stroke", "black")
-        //     .text("Year")
-
+        // hovering function to use
         var tooltip = d3.select("#barChart")
             .append("div")
             .style("opacity", 1)
@@ -108,9 +98,6 @@
             .style("padding", "10px")
 
         const mouseover = function(event, d){
-            // var subGroupName = d3.select(this.parentNode).datum().key;
-            // var subGroupValue = d.data[subGroupName];
-            console.log(d.key)
             tooltip
                 .html("Game: " + d.key + "<br>" + "Players: " + d.value)
                 .style("opacity", 1)
@@ -128,10 +115,9 @@
         }
 
 
-        // Show the bars
+        // Creating the bars
         svg.append("g")
             .selectAll("g")
-            // Enter in data = loop group per group
             .data(data)
             .join("g")
             .attr("transform", d => `translate(${x(d.Year) + 100}, 25)`)
@@ -152,6 +138,7 @@
             .on("mousemove", mousemove)
             .on("mouseleave", mouseleave);
 
+        // creating the legend manually by appending rectangles and separate titles
         svg.append("rect")
             .attr("x", 500)
             .attr("y", 200)
@@ -207,15 +194,6 @@
             .attr("y", 270)
             .attr("font-size", "15px")
             .text("Rainbow Six")
-
-        var city = g.selectAll(".city")
-            .data(games)
-            .enter().append("svg")
-            .attr("class", "city")
-            .attr("width", width - margin.right);
-
-
-
 
     })
 
